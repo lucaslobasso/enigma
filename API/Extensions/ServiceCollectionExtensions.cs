@@ -15,9 +15,13 @@ namespace Enigma.API.Extensions
             services.AddControllers();
             services.AddEndpointsApiExplorer();
             services.AddTransient<ExceptionMiddleware>();
+            services.AddSwagger();
+            services.AddAuthentication(configuration);
             services.AddServices();
+        }
 
-            // Swagger
+        private static void AddSwagger(this IServiceCollection services)
+        {
             services.AddSwaggerGen(options =>
             {
                 options.SwaggerDoc("v1", new OpenApiInfo { Title = "Enigma API", Version = "v1" });
@@ -31,8 +35,10 @@ namespace Enigma.API.Extensions
                 });
                 options.OperationFilter<SecurityRequirementsOperationFilter>();
             });
+        }
 
-            // Jwt authentication
+        private static void AddAuthentication(this IServiceCollection services, IConfiguration configuration)
+        {
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
@@ -42,7 +48,7 @@ namespace Enigma.API.Extensions
                         ValidateIssuer           = false,
                         ValidateAudience         = false,
                         IssuerSigningKey         = new SymmetricSecurityKey(
-                            Encoding.UTF8.GetBytes(configuration.GetValue<string>("AppSettings:Token"))
+                            Encoding.UTF8.GetBytes(configuration.GetValue<string>("Authentication:Token"))
                         )
                     };
                 });

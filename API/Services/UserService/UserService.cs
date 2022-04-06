@@ -7,18 +7,20 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using Infrastructure.Options;
+using Microsoft.Extensions.Options;
 
 namespace Enigma.API.Services.UserService
 {
     public class UserService : IUserService
     {
-        private readonly IConfiguration _configuration;
         private readonly IUserRepository _repository;
+        private readonly AuthenticationOptions _options;
 
-        public UserService(IConfiguration configuration, IUserRepository repository)
+        public UserService(IUserRepository repository, IOptions<AuthenticationOptions> options)
         {
-            _configuration = configuration;
-            _repository    = repository;
+            _repository = repository;
+            _options    = options.Value;
         }
 
         public async Task<string> RegisterAsync(UserDTO user, CancellationToken cancellationToken = default)
@@ -55,17 +57,16 @@ namespace Enigma.API.Services.UserService
 
         private string CreateToken(string username)
         {
-            var token    = _configuration.GetValue<string>("AppSettings:Token");
-            var key      = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(token));
-            var creds    = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
-            var claims   = new List<Claim>{ new Claim(ClaimTypes.Name, username) };
-            var jwtToken = new JwtSecurityToken(
+            var key    = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.Token));
+            var creds  = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
+            var claims = new List<Claim>{ new Claim(ClaimTypes.Name, username) };
+            var token  = new JwtSecurityToken(
                 claims             : claims,
                 signingCredentials : creds,
                 expires            : DateTime.Now.AddDays(1)
             );
 
-            return new JwtSecurityTokenHandler().WriteToken(jwtToken);
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
         private static void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
