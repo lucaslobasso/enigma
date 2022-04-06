@@ -4,13 +4,13 @@ namespace Enigma.Domain.Repositories
 {
     public interface IBaseRepository<T>
     {
-        Task<List<T>> GetAllAsync(Expression<Func<T, bool>>? filter = null);
-        Task<T> GetAsync(Guid id);
-        Task<T?> TryGetAsync(Guid id);
-        Task<bool> ExistsAsync(Guid id);
+        Task<List<T>> GetAllAsync(Expression<Func<T, bool>>? filter = null, CancellationToken cancellationToken = default);
+        Task<T> GetAsync(Guid id, CancellationToken cancellationToken = default);
+        Task<T?> TryGetAsync(Guid id, CancellationToken cancellationToken = default);
+        Task<bool> ExistsAsync(Guid id, CancellationToken cancellationToken = default);
         void Add(T entity);
         void Update(T entity);
-        void DeleteAsync(Guid id);
-        void SaveChangesAsync();
+        void DeleteAsync(Guid id, CancellationToken cancellationToken = default);
+        void SaveChangesAsync(CancellationToken cancellationToken = default);
     }
 }

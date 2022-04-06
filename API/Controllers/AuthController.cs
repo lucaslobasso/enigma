@@ -17,16 +17,16 @@ namespace Enigma.API.Controllers
         }
 
         [HttpPost("Register")]
-        public async Task<ActionResult<string>> Register(UserDTO request)
+        public async Task<ActionResult<string>> Register(UserDTO request, CancellationToken cancellationToken = default)
         {
-            var accessToken = await _service.RegisterAsync(request);
+            var accessToken = await _service.RegisterAsync(request, cancellationToken);
             return Ok(accessToken);
         }
 
         [HttpPost("Login")]
-        public async Task<ActionResult<string>> Login(UserDTO request)
+        public async Task<ActionResult<string>> Login(UserDTO request, CancellationToken cancellationToken = default)
         {
-            var accessToken = await _service.LoginAsync(request);
+            var accessToken = await _service.LoginAsync(request, cancellationToken);
             return Ok(accessToken);
         }
     }

@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 
 namespace Enigma.Infrastructure.Repositories
 {
-    public class BaseRepository<T> : IBaseRepository<T> where T : class, IBaseEntity
+    public abstract class BaseRepository<T> : IBaseRepository<T> where T : class, IBaseEntity
     {
         protected readonly DatabaseContext _context;
 
@@ -14,24 +14,34 @@ namespace Enigma.Infrastructure.Repositories
             _context = context;
         }
 
-        public async Task<List<T>> GetAllAsync(Expression<Func<T, bool>>? filter = null)
+        public async Task<List<T>> GetAllAsync(Expression<Func<T, bool>>? filter = null, CancellationToken cancellationToken = default)
         {
-            return filter is null ? await _context.Set<T>().ToListAsync() : await _context.Set<T>().Where(filter).ToListAsync();
+            var query = filter is null ? _context.Set<T>() : _context.Set<T>().Where(filter);
+
+            return await query.AsNoTracking()
+                .ToListAsync(cancellationToken)
+                .ConfigureAwait(false);
         }
 
-        public async Task<T> GetAsync(Guid id)
+        public async Task<T> GetAsync(Guid id, CancellationToken cancellationToken = default)
         {
-            return await _context.Set<T>().SingleAsync(w => w.Id == id);
+            return await _context.Set<T>()
+                .AsNoTracking()
+                .SingleAsync(w => w.Id == id, cancellationToken)
+                .ConfigureAwait(false);
         }
 
-        public async Task<T?> TryGetAsync(Guid id)
+        public async Task<T?> TryGetAsync(Guid id, CancellationToken cancellationToken = default)
         {
-            return await _context.Set<T>().FirstOrDefaultAsync(w => w.Id == id);
+            return await _context.Set<T>()
+                .AsNoTracking()
+                .FirstOrDefaultAsync(w => w.Id == id, cancellationToken)
+                .ConfigureAwait(false);
         }
 
-        public async Task<bool> ExistsAsync(Guid id)
+        public async Task<bool> ExistsAsync(Guid id, CancellationToken cancellationToken = default)
         {
-            return await TryGetAsync(id) is not null;
+            return await TryGetAsync(id, cancellationToken) is not null;
         }
 
         public void Add(T entity)
@@ -43,15 +53,15 @@ namespace Enigma.Infrastructure.Repositories
             _context.Set<T>().Update(entity);
         }
 
-        public async void DeleteAsync(Guid id)
+        public async void DeleteAsync(Guid id, CancellationToken cancellationToken = default)
         {
-            var entity = await GetAsync(id);
+            var entity = await GetAsync(id, cancellationToken);
             _context.Set<T>().Remove(entity);
         }
 
-        public async void SaveChangesAsync()
+        public async void SaveChangesAsync(CancellationToken cancellationToken = default)
         {
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
     }
 }

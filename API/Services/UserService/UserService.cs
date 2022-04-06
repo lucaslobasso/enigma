@@ -21,9 +21,9 @@ namespace Enigma.API.Services.UserService
             _repository    = repository;
         }
 
-        public async Task<string> RegisterAsync(UserDTO user)
+        public async Task<string> RegisterAsync(UserDTO user, CancellationToken cancellationToken = default)
         {
-            if (await _repository.ExistsAsync(user.Username))
+            if (await _repository.ExistsAsync(user.Username, cancellationToken))
             {
                 throw new ValidationException("User already exists");
             }
@@ -32,14 +32,14 @@ namespace Enigma.API.Services.UserService
             var entity = new User(user.Username, passwordHash, passwordSalt);
             
             _repository.Add(entity);
-            _repository.SaveChangesAsync();
+            _repository.SaveChangesAsync(cancellationToken);
 
             return CreateToken(entity.Username);
         }
 
-        public async Task<string> LoginAsync(UserDTO user)
+        public async Task<string> LoginAsync(UserDTO user, CancellationToken cancellationToken = default)
         {
-            var entity = await _repository.TryGetAsync(user.Username);
+            var entity = await _repository.TryGetAsync(user.Username, cancellationToken);
 
             if (entity is null)
             {
