@@ -53,13 +53,13 @@ namespace Enigma.Infrastructure.Repositories
             _context.Set<T>().Update(entity);
         }
 
-        public async void DeleteAsync(Guid id, CancellationToken cancellationToken = default)
+        public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
         {
             var entity = await GetAsync(id, cancellationToken);
             _context.Set<T>().Remove(entity);
         }
 
-        public async void SaveChangesAsync(CancellationToken cancellationToken = default)
+        public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
         {
             await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }

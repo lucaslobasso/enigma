@@ -10,7 +10,7 @@ namespace Enigma.Domain.Repositories
         Task<bool> ExistsAsync(Guid id, CancellationToken cancellationToken = default);
         void Add(T entity);
         void Update(T entity);
-        void DeleteAsync(Guid id, CancellationToken cancellationToken = default);
-        void SaveChangesAsync(CancellationToken cancellationToken = default);
+        Task DeleteAsync(Guid id, CancellationToken cancellationToken = default);
+        Task SaveChangesAsync(CancellationToken cancellationToken = default);
     }
 }

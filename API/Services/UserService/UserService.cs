@@ -1,5 +1,5 @@
 ﻿using Enigma.API.DTOs;
-using Enigma.API.Exceptions;
+using Enigma.Domain.Exceptions;
 using Enigma.Domain.Repositories;
 using Enigma.Domain.Entities;
 using Microsoft.IdentityModel.Tokens;
@@ -34,7 +34,7 @@ namespace Enigma.API.Services.UserService
             var entity = new User(user.Username, passwordHash, passwordSalt);
             
             _repository.Add(entity);
-            _repository.SaveChangesAsync(cancellationToken);
+            await _repository.SaveChangesAsync(cancellationToken);
 
             return CreateToken(entity.Username);
         }

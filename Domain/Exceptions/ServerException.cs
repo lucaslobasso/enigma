@@ -1,7 +1,7 @@
 ﻿using System.Net;
 using System.Runtime.CompilerServices;
 
-namespace Enigma.API.Exceptions
+namespace Enigma.Domain.Exceptions
 {
     public class ServerException : BaseException
     {

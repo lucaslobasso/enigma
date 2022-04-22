@@ -1,4 +1,4 @@
-﻿using Enigma.API.Exceptions;
+﻿using Enigma.Domain.Exceptions;
 using System.Net;
 
 namespace Enigma.API.Middleware

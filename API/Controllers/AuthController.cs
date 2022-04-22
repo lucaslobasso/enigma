@@ -7,6 +7,10 @@ namespace Enigma.API.Controllers
 {
     [ApiController]
     [AllowAnonymous]
+    [Route("[controller]")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public class AuthController : ControllerBase
     {
         private readonly IUserService _service;
@@ -17,16 +21,16 @@ namespace Enigma.API.Controllers
         }
 
         [HttpPost("Register")]
-        public async Task<ActionResult<string>> Register(UserDTO request, CancellationToken cancellationToken = default)
+        public async Task<ActionResult<string>> Register(UserDTO user, CancellationToken cancellationToken = default)
         {
-            var accessToken = await _service.RegisterAsync(request, cancellationToken);
+            var accessToken = await _service.RegisterAsync(user, cancellationToken);
             return Ok(accessToken);
         }
 
         [HttpPost("Login")]
-        public async Task<ActionResult<string>> Login(UserDTO request, CancellationToken cancellationToken = default)
+        public async Task<ActionResult<string>> Login(UserDTO user, CancellationToken cancellationToken = default)
         {
-            var accessToken = await _service.LoginAsync(request, cancellationToken);
+            var accessToken = await _service.LoginAsync(user, cancellationToken);
             return Ok(accessToken);
         }
     }
