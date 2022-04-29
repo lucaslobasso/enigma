@@ -2,21 +2,30 @@
 using Enigma.Domain.Entities;
 using Enigma.Domain.Exceptions;
 using Enigma.Domain.Repositories;
+using System.Security.Claims;
 
 namespace Enigma.API.Services.ApplicationService
 {
     public class ApplicationService : IApplicationService
     {
         private readonly IApplicationRepository _repository;
+        private readonly IHttpContextAccessor   _httpContextAccessor;
 
-        public ApplicationService(IApplicationRepository repository)
+        public ApplicationService(IApplicationRepository repository, IHttpContextAccessor httpContextAccessor)
         {
-            _repository = repository;
+            _repository          = repository;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<ApplicationDTO> GetAsync(Guid id, CancellationToken cancellationToken = default)
         {
-            var entity      = await _repository.GetAsync(id, cancellationToken);
+            var entity = await _repository.GetAsync(id, cancellationToken);
+
+            if (entity.UserId != GetCurrentUserId())
+            {
+                throw new ValidationException("Application does not exist.");
+            }
+
             var application = new ApplicationDTO()
             {
                 Id           = entity.Id,
@@ -28,7 +37,7 @@ namespace Enigma.API.Services.ApplicationService
 
         public async Task<List<ApplicationDTO>> GetAllAsync(CancellationToken cancellationToken = default)
         {
-            var entities     = await _repository.GetAllAsync(null, cancellationToken);
+            var entities     = await _repository.GetAllAsync(w => w.UserId == GetCurrentUserId(), cancellationToken);
             var applications = entities.Select(s => new ApplicationDTO() 
                 { 
                     Id           = s.Id,
@@ -39,11 +48,9 @@ namespace Enigma.API.Services.ApplicationService
             return applications;
         }
 
-        public async Task<Guid> Create(CreateApplicationDTO dto, CancellationToken cancellationToken = default)
+        public async Task<Guid> CreateAsync(CreateApplicationDTO dto, CancellationToken cancellationToken = default)
         {
-            var entity = new Application(
-                dto.Denomination
-            );
+            var entity = new Application(GetCurrentUserId(), dto.Denomination);
 
             _repository.Add(entity);
             await _repository.SaveChangesAsync(cancellationToken);
@@ -54,28 +61,44 @@ namespace Enigma.API.Services.ApplicationService
         {
             var entity = await _repository.TryGetAsync(dto.Id, cancellationToken);
             
-            if (entity is null)
+            if (entity is null || entity.UserId != GetCurrentUserId())
             {
                 throw new ValidationException("Application does not exist.");
             }
 
             entity.UpdateDenomination(dto.Denomination);
-
             _repository.Update(entity);
             await _repository.SaveChangesAsync(cancellationToken);
         }
 
         public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
         {
-            var exists = await _repository.ExistsAsync(id, cancellationToken);
+            var entity = await _repository.TryGetAsync(id, cancellationToken);
 
-            if (!exists)
+            if (entity is null || entity.UserId != GetCurrentUserId())
             {
                 throw new ValidationException("Application does not exist.");
             }
 
             await _repository.DeleteAsync(id, cancellationToken);
             await _repository.SaveChangesAsync(cancellationToken);
+        }
+
+        private Guid GetCurrentUserId()
+        {
+            if (_httpContextAccessor.HttpContext != null)
+            {
+                var subClaim = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                if (!Guid.TryParse(subClaim, out var userId))
+                {
+                    throw new UnauthorizedException("Invalid logged user Id.");
+                }
+
+                return userId;
+            }
+
+            throw new UnauthorizedException("Must be logged in.");
         }
     }
 }

@@ -31,7 +31,7 @@ namespace API.Controllers
         [HttpPost("Create")]
         public async Task<ActionResult<Guid>> Create(CreateApplicationDTO application, CancellationToken cancellationToken = default)
         {
-            var id = await _service.Create(application, cancellationToken);
+            var id = await _service.CreateAsync(application, cancellationToken);
             return Ok(id);
         }
 

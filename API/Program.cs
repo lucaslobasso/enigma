@@ -19,7 +19,7 @@ try
     builder.Host.UseNLog();
 
     builder.Services.AddApplicationLayer(builder.Configuration);
-    builder.Services.AddInfrastructureLayer(builder.Configuration);
+    builder.Services.AddInfrastructureLayer(builder.Configuration, builder.Environment);
 
     var app = builder.Build();
 

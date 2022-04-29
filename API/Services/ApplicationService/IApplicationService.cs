@@ -8,7 +8,7 @@ namespace Enigma.API.Services.ApplicationService
 
         Task<List<ApplicationDTO>> GetAllAsync(CancellationToken cancellationToken = default);
 
-        Task<Guid> Create(CreateApplicationDTO dto, CancellationToken cancellationToken = default);
+        Task<Guid> CreateAsync(CreateApplicationDTO dto, CancellationToken cancellationToken = default);
 
         Task UpdateAync(UpdateApplicationDTO dto, CancellationToken cancellationToken = default);
 

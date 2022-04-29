@@ -5,11 +5,13 @@ namespace Enigma.Domain.Entities
 {
     public class Application : BaseEntity
     {
-        public Application(string denomination)
+        public Application(Guid userId, string denomination)
         {
+            UserId       = userId;
             Denomination = denomination;
         }
 
+        public Guid UserId { get; internal set; }
         public string Denomination { get; internal set; }
 
         public void UpdateDenomination(string denomination)

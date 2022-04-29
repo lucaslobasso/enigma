@@ -1,9 +1,11 @@
-﻿using Enigma.API.Middleware;
+﻿using Enigma.API.Filters;
+using Enigma.API.Middleware;
+using Enigma.API.Services.ApplicationService;
+using Enigma.API.Services.LogService;
 using Enigma.API.Services.UserService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using Swashbuckle.AspNetCore.Filters;
 using System.Text;
 
 namespace Enigma.API.Extensions
@@ -26,14 +28,14 @@ namespace Enigma.API.Extensions
             {
                 options.SwaggerDoc("v1", new OpenApiInfo { Title = "Enigma API", Version = "v1" });
                 options.SupportNonNullableReferenceTypes();
-                options.AddSecurityDefinition("OAuth 2.0", new OpenApiSecurityScheme
+                options.AddSecurityDefinition("bearerAuth", new OpenApiSecurityScheme
                 {
-                    Name        = "Authorization",
-                    Description = "Standard authorization header using the Bearer scheme ('bearer [token]')",
-                    Type        = SecuritySchemeType.ApiKey,
-                    In          = ParameterLocation.Header
+                    Type         = SecuritySchemeType.Http,
+                    Scheme       = "bearer",
+                    BearerFormat = "JWT",
+                    Description  = "JWT Authorization header using the Bearer scheme."
                 });
-                options.OperationFilter<SecurityRequirementsOperationFilter>();
+                options.OperationFilter<AddAuthorizeAttributeFilter>();
             });
         }
 
@@ -45,6 +47,7 @@ namespace Enigma.API.Extensions
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
                         ValidateIssuerSigningKey = true,
+                        ValidateLifetime         = true,
                         ValidateIssuer           = false,
                         ValidateAudience         = false,
                         IssuerSigningKey         = new SymmetricSecurityKey(
@@ -57,6 +60,9 @@ namespace Enigma.API.Extensions
         private static void AddServices(this IServiceCollection services)
         {
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IApplicationService, ApplicationService>();
+            services.AddScoped<ILogService, LogService>();
+            services.AddHttpContextAccessor();
         }
     }
 }

@@ -7,7 +7,6 @@ namespace Enigma.API.Controllers
 {
     [ApiController]
     [AllowAnonymous]
-    [Route("[controller]")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]

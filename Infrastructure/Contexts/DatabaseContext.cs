@@ -11,5 +11,7 @@ namespace Enigma.Infrastructure.Contexts
         }
 
         public DbSet<User> Users => base.Set<User>();
+        public DbSet<Application> Applications => base.Set<Application>();
+        public DbSet<Log> Logs => base.Set<Log>();
     }
 }

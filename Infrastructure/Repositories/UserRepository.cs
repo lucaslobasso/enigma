@@ -9,24 +9,24 @@ namespace Enigma.Infrastructure.Repositories
         {
         }
 
-        public async Task<User> GetAsync(string username, CancellationToken cancellationToken = default)
+        public async Task<User> GetAsync(string email, CancellationToken cancellationToken = default)
         {
             return await _context.Users
                 .AsNoTracking()
-                .SingleAsync(w => w.Username == username, cancellationToken)
+                .SingleAsync(w => w.Email == email, cancellationToken)
                 .ConfigureAwait(false);
         }
 
-        public async Task<User?> TryGetAsync(string username, CancellationToken cancellationToken = default)
+        public async Task<User?> TryGetAsync(string email, CancellationToken cancellationToken = default)
         {
             return await _context.Users
                 .AsNoTracking()
-                .FirstOrDefaultAsync(w => w.Username == username, cancellationToken)
+                .FirstOrDefaultAsync(w => w.Email == email, cancellationToken)
                 .ConfigureAwait(false);
         }
-        public async Task<bool> ExistsAsync(string username, CancellationToken cancellationToken = default)
+        public async Task<bool> ExistsAsync(string email, CancellationToken cancellationToken = default)
         {
-            return await TryGetAsync(username, cancellationToken) is not null;
+            return await TryGetAsync(email, cancellationToken) is not null;
         }
     }
 }
